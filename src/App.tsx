@@ -1,28 +1,78 @@
 import { useEffect, useRef } from "react";
 import "./App.css";
+import { initBuffers } from "./buffer";
+import { drawScene } from "./renderer";
+import { initShaderProgram } from "./shader";
+
+// Vertex shader program
+const vsSource: string = `
+attribute vec4 aVertexPosition;
+
+uniform mat4 uModelViewMatrix;
+uniform mat4 uProjectionMatrix;
+
+void main() {
+  gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
+}
+`;
+
+// Fragment shader program
+const fsSource: string = `
+void main() {
+  gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+}
+`;
 
 function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     if (canvasRef.current === null) {
-      throw new Error("Ref of canvas element is null.");
+      console.error("Ref of canvas element is null.");
+      return;
     }
 
     const canvas: HTMLCanvasElement = canvasRef.current;
-    const gl = canvas.getContext("webgl");
+    const gl: WebGLRenderingContext | null = canvas.getContext("webgl");
 
     if (gl === null) {
       alert(
         "Unable to initialize WebGL. Your browser or machine may not support it."
       );
+      console.error("Failed to get canvas context of WebGL.");
       return;
     }
 
-    // Set clear color to black, fully opaque
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
-    // Clear the color buffer with specified clear color
-    gl.clear(gl.COLOR_BUFFER_BIT);
+    // Initialize shader program
+    const shaderProgram = initShaderProgram(gl, vsSource, fsSource);
+    if (shaderProgram === null) {
+      console.error("Failed to initialize shader program.");
+      return;
+    }
+
+    // Store attribute and uniform locations
+    const programInfo = {
+      program: shaderProgram,
+      attribLocations: {
+        vertexPosition: gl.getAttribLocation(shaderProgram, "aVertexPosition"),
+      },
+      uniformLocations: {
+        projectionMatrix: gl.getUniformLocation(
+          shaderProgram,
+          "uProjectionMatrix"
+        ),
+        modelViewMatrix: gl.getUniformLocation(
+          shaderProgram,
+          "uModelViewMatrix"
+        ),
+      },
+    };
+
+    // Initialize buffers
+    const buffers = initBuffers(gl);
+
+    // Rendering the scene
+    drawScene(gl, programInfo, buffers);
   }, []);
 
   return (
