@@ -12,15 +12,19 @@ type ProgramInfo = {
   };
 };
 
-let squareRotation = 0.0;
+let cubeRotation = 0.0;
 
 export const drawScene = (
   gl: WebGLRenderingContext,
   programInfo: ProgramInfo,
-  buffers: { position: WebGLBuffer | null; color: WebGLBuffer | null },
+  buffers: {
+    position: WebGLBuffer | null;
+    color: WebGLBuffer | null;
+    indices: WebGLBuffer | null;
+  },
   deltaTime: number
 ): void => {
-  squareRotation += deltaTime;
+  cubeRotation += deltaTime;
 
   gl.clearColor(0.0, 0.0, 0.0, 1.0); // Clear to black, fully opaque
   gl.clearDepth(1.0); // Clear everything
@@ -59,22 +63,16 @@ export const drawScene = (
     modelViewMatrix, // matrix to translate
     [-0.0, 0.0, -6.0] // amount to translate
   );
-  mat4.rotate(
-    modelViewMatrix, // destination matrix
-    modelViewMatrix, // matrix to rotate
-    squareRotation, // amount to rotate in radians
-    [0, 0, 1] // axis to rotate around
-  );
+  mat4.rotate(modelViewMatrix, modelViewMatrix, cubeRotation * 0.7, [1, 1, 1]);
 
   //   Tell WebGL how to pull out the positions from the position
   //   buffer into the vertexPosition attribute.
   {
-    const numComponents = 2; // pull out 2 values per iteration
-    const type = gl.FLOAT; // the data in the buffer is 32bit floats
-    const normalize = false; // don't normalize
-    const stride = 0; // how many bytes to get from one set of values to the next
-    // 0 = use type and numComponents above
-    const offset = 0; // how many bytes inside the buffer to start from
+    const numComponents = 3;
+    const type = gl.FLOAT;
+    const normalize = false;
+    const stride = 0;
+    const offset = 0;
     gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
     gl.vertexAttribPointer(
       programInfo.attribLocations.vertexPosition,
@@ -107,12 +105,13 @@ export const drawScene = (
     gl.enableVertexAttribArray(programInfo.attribLocations.vertexColor);
   }
 
-  // Tell WebGL to use our program when drawing
+  // Tell WebGL which indices to use to index the vertices
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers.indices);
 
+  // Tell WebGL to use our program when drawing
   gl.useProgram(programInfo.program);
 
   // Set the shader uniforms
-
   gl.uniformMatrix4fv(
     programInfo.uniformLocations.projectionMatrix,
     false,
@@ -125,8 +124,9 @@ export const drawScene = (
   );
 
   {
+    const vertexCount = 36;
+    const type = gl.UNSIGNED_SHORT;
     const offset = 0;
-    const vertexCount = 4;
-    gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
+    gl.drawElements(gl.TRIANGLES, vertexCount, type, offset);
   }
 };
