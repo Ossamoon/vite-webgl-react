@@ -4,11 +4,12 @@ type ProgramInfo = {
   program: WebGLProgram;
   attribLocations: {
     vertexPosition: number;
-    vertexColor: number;
+    textureCoord: number;
   };
   uniformLocations: {
     projectionMatrix: WebGLUniformLocation | null;
     modelViewMatrix: WebGLUniformLocation | null;
+    uSampler: WebGLUniformLocation | null;
   };
 };
 
@@ -19,9 +20,10 @@ export const drawScene = (
   programInfo: ProgramInfo,
   buffers: {
     position: WebGLBuffer | null;
-    color: WebGLBuffer | null;
+    textureCoord: WebGLBuffer | null;
     indices: WebGLBuffer | null;
   },
+  texture: WebGLTexture | null,
   deltaTime: number
 ): void => {
   cubeRotation += deltaTime;
@@ -63,7 +65,7 @@ export const drawScene = (
     modelViewMatrix, // matrix to translate
     [-0.0, 0.0, -6.0] // amount to translate
   );
-  mat4.rotate(modelViewMatrix, modelViewMatrix, cubeRotation * 0.7, [1, 1, 1]);
+  mat4.rotate(modelViewMatrix, modelViewMatrix, cubeRotation * 0.7, [0, -1, 1]);
 
   //   Tell WebGL how to pull out the positions from the position
   //   buffer into the vertexPosition attribute.
@@ -85,24 +87,23 @@ export const drawScene = (
     gl.enableVertexAttribArray(programInfo.attribLocations.vertexPosition);
   }
 
-  // Tell WebGL how to pull out the colors from the color buffer
-  // into the vertexColor attribute.
+  // Tell webgl how to pull out the texture coordinates from buffer
   {
-    const numComponents = 4;
-    const type = gl.FLOAT;
-    const normalize = false;
-    const stride = 0;
-    const offset = 0;
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.color);
+    const num = 2; // every coordinate composed of 2 values
+    const type = gl.FLOAT; // the data in the buffer is 32-bit float
+    const normalize = false; // don't normalize
+    const stride = 0; // how many bytes to get from one set to the next
+    const offset = 0; // how many bytes inside the buffer to start from
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.textureCoord);
     gl.vertexAttribPointer(
-      programInfo.attribLocations.vertexColor,
-      numComponents,
+      programInfo.attribLocations.textureCoord,
+      num,
       type,
       normalize,
       stride,
       offset
     );
-    gl.enableVertexAttribArray(programInfo.attribLocations.vertexColor);
+    gl.enableVertexAttribArray(programInfo.attribLocations.textureCoord);
   }
 
   // Tell WebGL which indices to use to index the vertices
@@ -122,6 +123,15 @@ export const drawScene = (
     false,
     modelViewMatrix
   );
+
+  // Tell WebGL we want to affect texture unit 0
+  gl.activeTexture(gl.TEXTURE0);
+
+  // Bind the texture to texture unit 0
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+
+  // Tell the shader we bound the texture to texture unit 0
+  gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
 
   {
     const vertexCount = 36;

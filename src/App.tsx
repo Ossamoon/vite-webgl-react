@@ -3,31 +3,7 @@ import "./App.css";
 import { initBuffers } from "./buffer";
 import { drawScene } from "./renderer";
 import { initShaderProgram } from "./shader";
-
-// Vertex shader program
-const vsSource: string = `
-attribute vec4 aVertexPosition;
-attribute vec4 aVertexColor;
-
-uniform mat4 uModelViewMatrix;
-uniform mat4 uProjectionMatrix;
-
-varying lowp vec4 vColor;
-
-void main() {
-  gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
-  vColor = aVertexColor;
-}
-`;
-
-// Fragment shader program
-const fsSource: string = `
-varying lowp vec4 vColor;
-
-void main() {
-  gl_FragColor = vColor;
-}
-`;
+import { loadTexture } from "./texture";
 
 function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -50,7 +26,7 @@ function App() {
     }
 
     // Initialize shader program
-    const shaderProgram = initShaderProgram(gl, vsSource, fsSource);
+    const shaderProgram = initShaderProgram(gl);
     if (shaderProgram === null) {
       console.error("Failed to initialize shader program.");
       return;
@@ -61,7 +37,7 @@ function App() {
       program: shaderProgram,
       attribLocations: {
         vertexPosition: gl.getAttribLocation(shaderProgram, "aVertexPosition"),
-        vertexColor: gl.getAttribLocation(shaderProgram, "aVertexColor"),
+        textureCoord: gl.getAttribLocation(shaderProgram, "aTextureCoord"),
       },
       uniformLocations: {
         projectionMatrix: gl.getUniformLocation(
@@ -72,21 +48,24 @@ function App() {
           shaderProgram,
           "uModelViewMatrix"
         ),
+        uSampler: gl.getUniformLocation(shaderProgram, "uSampler"),
       },
     };
 
     // Initialize buffers
     const buffers = initBuffers(gl);
 
-    let then = 0;
+    // Load texture
+    const texture = loadTexture(gl, "/image.jpg");
 
     // Draw the scene repeatedly
+    let then = 0;
     const render = (now: DOMHighResTimeStamp) => {
       now *= 0.001; // convert to seconds
       const deltaTime = now - then;
       then = now;
 
-      drawScene(gl, programInfo, buffers, deltaTime);
+      drawScene(gl, programInfo, buffers, texture, deltaTime);
 
       requestAnimationFrame(render);
     };

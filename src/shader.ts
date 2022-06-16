@@ -1,10 +1,35 @@
+// Vertex shader program
+const vsSource: string = `
+attribute vec4 aVertexPosition;
+attribute vec2 aTextureCoord;
+
+uniform mat4 uModelViewMatrix;
+uniform mat4 uProjectionMatrix;
+
+varying highp vec2 vTextureCoord;
+
+void main() {
+  gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
+  vTextureCoord = aTextureCoord;
+}
+`;
+
+// Fragment shader program
+const fsSource: string = `
+varying highp vec2 vTextureCoord;
+
+uniform sampler2D uSampler;
+
+void main() {
+  gl_FragColor = texture2D(uSampler, vTextureCoord);
+}
+`;
+
 //
 // Initialize a shader program, so WebGL knows how to draw our data
 //
 export const initShaderProgram = (
-  gl: WebGLRenderingContext,
-  vsSource: string,
-  fsSource: string
+  gl: WebGLRenderingContext
 ): WebGLProgram | null => {
   const vertexShader = loadShader(gl, gl.VERTEX_SHADER, vsSource);
   const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, fsSource);
