@@ -78,8 +78,20 @@ function App() {
     // Initialize buffers
     const buffers = initBuffers(gl);
 
-    // Rendering the scene
-    drawScene(gl, programInfo, buffers);
+    let then = 0;
+
+    // Draw the scene repeatedly
+    const render = (now: DOMHighResTimeStamp) => {
+      now *= 0.001; // convert to seconds
+      const deltaTime = now - then;
+      then = now;
+
+      drawScene(gl, programInfo, buffers, deltaTime);
+
+      requestAnimationFrame(render);
+    };
+
+    requestAnimationFrame(render);
   }, []);
 
   return (
