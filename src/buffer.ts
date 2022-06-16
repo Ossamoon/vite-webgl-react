@@ -42,6 +42,53 @@ export const initBuffers = (gl: WebGLRenderingContext) => {
   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
+  // Create normal vector buffer
+  const vertexNormals = [
+    // Front
+    ...[0.0, 0.0, 1.0],
+    ...[0.0, 0.0, 1.0],
+    ...[0.0, 0.0, 1.0],
+    ...[0.0, 0.0, 1.0],
+
+    // Back
+    ...[0.0, 0.0, -1.0],
+    ...[0.0, 0.0, -1.0],
+    ...[0.0, 0.0, -1.0],
+    ...[0.0, 0.0, -1.0],
+
+    // Top
+    ...[0.0, 1.0, 0.0],
+    ...[0.0, 1.0, 0.0],
+    ...[0.0, 1.0, 0.0],
+    ...[0.0, 1.0, 0.0],
+
+    // Bottom
+    ...[0.0, -1.0, 0.0],
+    ...[0.0, -1.0, 0.0],
+    ...[0.0, -1.0, 0.0],
+    ...[0.0, -1.0, 0.0],
+
+    // Right
+    ...[1.0, 0.0, 0.0],
+    ...[1.0, 0.0, 0.0],
+    ...[1.0, 0.0, 0.0],
+    ...[1.0, 0.0, 0.0],
+
+    // Left
+    ...[-1.0, 0.0, 0.0],
+    ...[-1.0, 0.0, 0.0],
+    ...[-1.0, 0.0, 0.0],
+    ...[-1.0, 0.0, 0.0],
+  ];
+
+  const normalBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+  gl.bufferData(
+    gl.ARRAY_BUFFER,
+    new Float32Array(vertexNormals),
+    gl.STATIC_DRAW
+  );
+
   // Create texture coordinate buffer
   const textureCoordinates = [
     // Front
@@ -109,6 +156,7 @@ export const initBuffers = (gl: WebGLRenderingContext) => {
 
   return {
     position: positionBuffer,
+    normal: normalBuffer,
     textureCoord: textureCoordBuffer,
     indices: indexBuffer,
   };

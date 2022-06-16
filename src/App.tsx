@@ -37,6 +37,7 @@ function App() {
       program: shaderProgram,
       attribLocations: {
         vertexPosition: gl.getAttribLocation(shaderProgram, "aVertexPosition"),
+        vertexNormal: gl.getAttribLocation(shaderProgram, "aVertexNormal"),
         textureCoord: gl.getAttribLocation(shaderProgram, "aTextureCoord"),
       },
       uniformLocations: {
@@ -48,6 +49,7 @@ function App() {
           shaderProgram,
           "uModelViewMatrix"
         ),
+        normalMatrix: gl.getUniformLocation(shaderProgram, "uNormalMatrix"),
         uSampler: gl.getUniformLocation(shaderProgram, "uSampler"),
       },
     };
@@ -60,6 +62,7 @@ function App() {
 
     // Draw the scene repeatedly
     let then = 0;
+    let myReq: number | null = null;
     const render = (now: DOMHighResTimeStamp) => {
       now *= 0.001; // convert to seconds
       const deltaTime = now - then;
@@ -67,10 +70,14 @@ function App() {
 
       drawScene(gl, programInfo, buffers, texture, deltaTime);
 
-      requestAnimationFrame(render);
+      myReq = requestAnimationFrame(render);
     };
+    myReq = requestAnimationFrame(render);
 
-    requestAnimationFrame(render);
+    return () => {
+      if (myReq === null) return;
+      cancelAnimationFrame(myReq);
+    };
   }, []);
 
   return (
