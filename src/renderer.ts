@@ -4,6 +4,7 @@ type ProgramInfo = {
   program: WebGLProgram;
   attribLocations: {
     vertexPosition: number;
+    vertexColor: number;
   };
   uniformLocations: {
     projectionMatrix: WebGLUniformLocation | null;
@@ -14,7 +15,7 @@ type ProgramInfo = {
 export const drawScene = (
   gl: WebGLRenderingContext,
   programInfo: ProgramInfo,
-  buffers: { position: WebGLBuffer | null }
+  buffers: { position: WebGLBuffer | null; color: WebGLBuffer | null }
 ): void => {
   gl.clearColor(0.0, 0.0, 0.0, 1.0); // Clear to black, fully opaque
   gl.clearDepth(1.0); // Clear everything
@@ -74,6 +75,26 @@ export const drawScene = (
       offset
     );
     gl.enableVertexAttribArray(programInfo.attribLocations.vertexPosition);
+  }
+
+  // Tell WebGL how to pull out the colors from the color buffer
+  // into the vertexColor attribute.
+  {
+    const numComponents = 4;
+    const type = gl.FLOAT;
+    const normalize = false;
+    const stride = 0;
+    const offset = 0;
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.color);
+    gl.vertexAttribPointer(
+      programInfo.attribLocations.vertexColor,
+      numComponents,
+      type,
+      normalize,
+      stride,
+      offset
+    );
+    gl.enableVertexAttribArray(programInfo.attribLocations.vertexColor);
   }
 
   // Tell WebGL to use our program when drawing

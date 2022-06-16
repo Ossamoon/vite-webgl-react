@@ -10,7 +10,12 @@ export const initBuffers = (gl: WebGLRenderingContext) => {
 
   // Now create an array of positions for the square.
 
-  const positions = [1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0, -1.0];
+  const positions = [
+    ...[1.0, 1.0],
+    ...[-1.0, 1.0],
+    ...[1.0, -1.0],
+    ...[-1.0, -1.0],
+  ];
 
   // Now pass the list of positions into WebGL to build the
   // shape. We do this by creating a Float32Array from the
@@ -18,7 +23,19 @@ export const initBuffers = (gl: WebGLRenderingContext) => {
 
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
+  // Create color buffer
+  const colors = [
+    ...[1.0, 1.0, 1.0, 1.0], // white
+    ...[1.0, 0.0, 0.0, 1.0], // red
+    ...[0.0, 1.0, 0.0, 1.0], // green
+    ...[0.0, 0.0, 1.0, 1.0], // blue
+  ];
+  const colorBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+
   return {
     position: positionBuffer,
+    color: colorBuffer,
   };
 };
