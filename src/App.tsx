@@ -58,7 +58,10 @@ function App() {
     const buffers = initBuffers(gl);
 
     // Load texture
-    const texture = loadTexture(gl, "/image.jpg");
+    const texture = loadTexture(
+      gl,
+      "https://user-images.githubusercontent.com/73047429/176642580-c30e3711-d630-4459-b98b-43b9c368abce.jpg"
+    );
 
     // Draw the scene repeatedly
     let then = 0;
