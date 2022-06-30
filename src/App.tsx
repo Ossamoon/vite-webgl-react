@@ -60,7 +60,7 @@ function App() {
     // Load texture
     const texture = loadTexture(
       gl,
-      "https://user-images.githubusercontent.com/73047429/176642580-c30e3711-d630-4459-b98b-43b9c368abce.jpg"
+      "https://www.cotta.jp/special/article/wp-content/uploads/2019/08/20190825_nyonta_eye.jpg"
     );
 
     // Draw the scene repeatedly
